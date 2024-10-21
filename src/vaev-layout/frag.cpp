@@ -348,6 +348,15 @@ Output layout(Tree &t, Frag &f, Input input) {
         input.knownSize.width = specifiedWidth;
     }
     input.knownSize.width = input.knownSize.width.map([&](auto s) {
+        if (sizing->maxWidth == Size::LENGTH) {
+            auto maxWidth = resolve(t, f, sizing->maxWidth.value, input.containingBlock.width);
+            s = min(s, maxWidth);
+        }
+        if (sizing->minWidth == Size::LENGTH) {
+            auto minWidth = resolve(t, f, sizing->minWidth.value, input.containingBlock.width);
+            s = max(s, minWidth);
+        }
+
         if (boxSizing == BoxSizing::BORDER_BOX or specifiedWidth == NONE)
             return max(Px{0}, s - padding.horizontal() - borders.horizontal());
         return s;
@@ -360,6 +369,15 @@ Output layout(Tree &t, Frag &f, Input input) {
     }
 
     input.knownSize.height = input.knownSize.height.map([&](auto s) {
+        if (sizing->maxHeight == Size::LENGTH) {
+            auto maxHeight = resolve(t, f, sizing->maxHeight.value, input.containingBlock.height);
+            s = min(s, maxHeight);
+        }
+        if (sizing->minHeight == Size::LENGTH) {
+            auto minHeight = resolve(t, f, sizing->minHeight.value, input.containingBlock.height);
+            s = max(s, minHeight);
+        }
+
         if (boxSizing == BoxSizing::BORDER_BOX or specifiedHeight == NONE)
             return max(Px{0}, s - padding.vertical() - borders.vertical());
         return s;
