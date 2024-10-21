@@ -340,6 +340,7 @@ Output layout(Tree &t, Frag &f, Input input) {
     auto borders = computeBorders(t, f);
     auto padding = _computePaddings(t, f, input);
     auto sizing = f.style->sizing;
+    auto boxSizing = f.style->boxSizing;
 
     auto [specifiedWidth, widthIntrinsicSize] = _computeSpecifiedSize(t, f, input, sizing->width, input.intrinsic.x);
     if (input.knownSize.width == NONE) {
@@ -347,8 +348,9 @@ Output layout(Tree &t, Frag &f, Input input) {
         input.knownSize.width = specifiedWidth;
     }
     input.knownSize.width = input.knownSize.width.map([&](auto s) {
-        // FIXME: Take box-sizing into account
-        return s - padding.horizontal() - borders.horizontal();
+        if (boxSizing == BoxSizing::BORDER_BOX or specifiedWidth == NONE)
+            return max(Px{0}, s - padding.horizontal() - borders.horizontal());
+        return s;
     });
     input.intrinsic.x = widthIntrinsicSize;
 
@@ -358,8 +360,9 @@ Output layout(Tree &t, Frag &f, Input input) {
     }
 
     input.knownSize.height = input.knownSize.height.map([&](auto s) {
-        // FIXME: Take box-sizing into account
-        return s - padding.vertical() - borders.vertical();
+        if (boxSizing == BoxSizing::BORDER_BOX or specifiedHeight == NONE)
+            return max(Px{0}, s - padding.vertical() - borders.vertical());
+        return s;
     });
     input.intrinsic.y = heightIntrinsicSize;
 
